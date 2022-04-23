@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="col-lg-6 mx-auto">
+        <h1 class="display-5 fw-bold text-center mb-5">Crawler</h1>
+    </div>
+    <div class="col-lg-6 mx-auto">
+        <form action="/">
+            <div class="input-group mb-3">
+                <input
+                    type="text"
+                    placeholder="Site url"
+                    name="{{ form.site_url.html_name }}"
+                    class="form-control{% if form.site_url.errors %} is-invalid{% endif %}"
+                    {% if form.site_url.value is not None %}
+                        value="{{ form.site_url.value }}"
+                    {% endif %}
+                >
+                <button type="submit" class="btn btn-primary">go</button>
+            </div>
+        </form>
+        {% for _, message in form.errors.items %}
+            <small class="text-danger">{{ message }}</small>
+        {% endfor %}
+    </div>
+
+    {% if urls %}
+        <div class="col-lg-6 mx-auto">
+            <h3 class="mb-3 mt-3">URL list: </h3>
+            {% for url in urls %}
+                <p class="mt-1 mb-1">
+                    <a href="{{ url }}">{{ url }}</a>
+                </p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+{% endblock %}
