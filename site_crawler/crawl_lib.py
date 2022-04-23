@@ -24,8 +24,12 @@ class Crawler:
                 if resp.content_type != 'text/html':
                     return []
                 text = await resp.text()
-        except aiohttp.ClientError:
-            log.exception('Cannot fetch url {}'.format(url))
+        except (aiohttp.ClientError, asyncio.exceptions.TimeoutError) as err:
+            log.error('Cannot fetch url {}: {} {}'.format(
+                url,
+                err.__class__.__name__,
+                err,
+            ))
             return []
 
         soup = BeautifulSoup(text, features="html.parser")
@@ -61,7 +65,6 @@ class Crawler:
         """
         Loads hrefs from url recursively
         """
-        print('Loading hrefs from {} {}'.format(url, depth_left))
         log.debug('Loading hrefs from {}'.format(url))
         current_hrefs = await self._get_site_hrefs(session, url)
 
@@ -75,7 +78,7 @@ class Crawler:
 
         # Run next level of recursion
         next_depth_left = depth_left - 1
-        if next_depth_left:
+        if next_depth_left and to_visit:
             await asyncio.wait([
                 asyncio.create_task(self._load_hrefs(
                     session=session,

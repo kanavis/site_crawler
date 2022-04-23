@@ -1,18 +1,12 @@
 #!/usr/bin/env python
 import asyncio
-
-
-async def sleep_print(x):
-    await asyncio.sleep(1)
-    print('aaa {}'.format(x))
-    return x + 1
+import aiohttp
 
 
 async def main():
-    res = await asyncio.wait([
-        asyncio.create_task(sleep_print(x))
-        for x in range(5)
-    ])
-    print(res for res[0])
+    async with aiohttp.ClientSession() as session:
+        async with session.get('http://bbc.com') as resp:
+            print(await resp.text())
+
 
 asyncio.run(main())
