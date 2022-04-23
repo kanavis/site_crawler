@@ -28,6 +28,7 @@ class CrawlView(View):
                 crawler = Crawler(url=form.data['site_url'])
                 context['urls'] = await crawler.get_hrefs_recursively(
                     max_depth=settings.MAX_HREF_CRAWL_DEPTH,
+                    total_timeout=settings.CRAWL_TOTAL_TIMEOUT,
                 )
         else:
             form = CrawlerForm()

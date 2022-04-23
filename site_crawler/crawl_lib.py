@@ -87,11 +87,15 @@ class Crawler:
                 for url in to_visit
             ])
 
-    async def get_hrefs_recursively(self, max_depth: int) -> set[str]:
+    async def get_hrefs_recursively(
+        self,
+        max_depth: int,
+        total_timeout: float = 5.0,
+    ) -> set[str]:
         """ Get all hrefs from crawler URL recursively with max_depth """
         hrefs = set()
         visited = set()
-        timeout = aiohttp.ClientTimeout(total=5.0)
+        timeout = aiohttp.ClientTimeout(total=total_timeout)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             await self._load_hrefs(
                 session=session,
