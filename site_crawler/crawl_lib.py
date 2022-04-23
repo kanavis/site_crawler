@@ -14,19 +14,22 @@ class Crawler:
     def __init__(self, url: str):
         self._url = url
 
-    async def _get_site_hrefs(self, url: str) -> Iterable[str]:
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(url) as resp:
-                    if resp.content_type != 'text/html':
-                        return []
-                    text = await resp.text()
-            except aiohttp.ClientError:
-                log.exception('Cannot fetch url {}'.format(url))
-                return []
+    async def _get_site_hrefs(
+        self,
+        session: aiohttp.ClientSession,
+        url: str,
+    ) -> Iterable[str]:
+        try:
+            async with session.get(url) as resp:
+                if resp.content_type != 'text/html':
+                    return []
+                text = await resp.text()
+        except aiohttp.ClientError:
+            log.exception('Cannot fetch url {}'.format(url))
+            return []
 
-            soup = BeautifulSoup(text, features="html.parser")
-            return (a['href'] for a in soup.find_all('a', href=True))
+        soup = BeautifulSoup(text, features="html.parser")
+        return (a['href'] for a in soup.find_all('a', href=True))
 
     @staticmethod
     def _abs_url(base_url, href) -> Optional[str]:
@@ -49,6 +52,7 @@ class Crawler:
 
     async def _load_hrefs(
         self,
+        session: aiohttp.ClientSession,
         url: str,
         depth_left: int,
         hrefs: set[str],
@@ -59,9 +63,8 @@ class Crawler:
         """
         print('Loading hrefs from {} {}'.format(url, depth_left))
         log.debug('Loading hrefs from {}'.format(url))
-        # Load hrefs from current url
-        # hrefs is as-is site hrefs
-        current_hrefs = await self._get_site_hrefs(url)
+        current_hrefs = await self._get_site_hrefs(session, url)
+
         to_visit = []
         for href in current_hrefs:
             hrefs.add(href)
@@ -75,6 +78,7 @@ class Crawler:
         if next_depth_left:
             await asyncio.wait([
                 asyncio.create_task(self._load_hrefs(
+                    session=session,
                     url=url,
                     depth_left=next_depth_left,
                     hrefs=hrefs,
@@ -87,10 +91,13 @@ class Crawler:
         """ Get all hrefs from crawler URL recursively with max_depth """
         hrefs = set()
         visited = set()
-        await self._load_hrefs(
-            url=self._url,
-            depth_left=max_depth,
-            hrefs=hrefs,
-            visited=visited,
-        )
+        timeout = aiohttp.ClientTimeout(total=5.0)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            await self._load_hrefs(
+                session=session,
+                url=self._url,
+                depth_left=max_depth,
+                hrefs=hrefs,
+                visited=visited,
+            )
         return visited
