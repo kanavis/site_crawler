@@ -27,12 +27,14 @@
     <div class="col-lg-6 mx-auto">
         <p id="crawl-loading" style="display: none;">Loading...</p>
         {% if urls %}
-            <h3 class="mb-3 mt-3">URL list: </h3>
-            {% for url in urls %}
-                <p class="mt-1 mb-1">
-                    {{ url }}
-                </p>
-            {% endfor %}
+            <div id="crawl-urls">
+                <h3 class="mb-3 mt-3">URL list: </h3>
+                {% for url in urls %}
+                    <p class="mt-1 mb-1">
+                        {{ url }}
+                    </p>
+                {% endfor %}
+            </div>
         {% endif %}
     </div>
 
@@ -42,8 +44,12 @@
     <script type="text/javascript">
         let crawl_form = document.getElementById('crawl-form');
         let crawl_loading = document.getElementById('crawl-loading');
+        let crawl_urls = document.getElementById('crawl-urls');
         crawl_form.onsubmit = () => {
             crawl_loading.style.display = 'block';
+            if (crawl_urls) {
+                crawl_urls.style.display = 'none';
+            }
         }
     </script>
 {% endblock %}
