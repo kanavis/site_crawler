@@ -30,7 +30,7 @@
             <h3 class="mb-3 mt-3">URL list: </h3>
             {% for url in urls %}
                 <p class="mt-1 mb-1">
-                    <a href="{{ url }}" target="_blank">{{ url }}</a>
+                    {{ url }}
                 </p>
             {% endfor %}
         {% endif %}

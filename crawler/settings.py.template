@@ -21,6 +21,7 @@ TIME_ZONE = 'US/Pacific'
 
 # Maximum href crawl depth
 MAX_HREF_CRAWL_DEPTH = 3
+CRAWL_TOTAL_TIMEOUT = 5.0
 
 
 LOGGING = {

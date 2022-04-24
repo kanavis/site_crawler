@@ -39,20 +39,21 @@ class Crawler:
     def _abs_url(base_url, href) -> Optional[str]:
         """
         Parses href into absolute URL relative to base_url.
-        Returns None if url is just a fragment.
+        Returns None if url is just a fragment or not http/https
         """
         if href.startswith('#'):
             return None
-        base_url_parse = urlparse(base_url)
         href_parse = urlparse(href)
-        if base_url_parse.path:
-            return '{scheme}://{netloc}{path}{params}{query}'.format(
-                scheme=href_parse.scheme or base_url_parse.scheme,
-                netloc=href_parse.netloc or base_url_parse.netloc,
-                path=href_parse.path,
-                params=';' + href_parse.params if href_parse.params else '',
-                query='?' + href_parse.query if href_parse.query else '',
-            )
+        if href_parse.scheme and href_parse.scheme not in ('http', 'https'):
+            return None
+        base_url_parse = urlparse(base_url)
+        return '{scheme}://{netloc}{path}{params}{query}'.format(
+            scheme=href_parse.scheme or base_url_parse.scheme,
+            netloc=href_parse.netloc or base_url_parse.netloc,
+            path=href_parse.path,
+            params=';' + href_parse.params if href_parse.params else '',
+            query='?' + href_parse.query if href_parse.query else '',
+        )
 
     async def _load_hrefs(
         self,
@@ -107,4 +108,4 @@ class Crawler:
                 hrefs=hrefs,
                 visited=visited,
             )
-        return visited
+        return hrefs
